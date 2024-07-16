@@ -1,0 +1,28 @@
+### GRPC save
+GRPC localhost:8081/store.Store/Save
+
+{
+  "key": "timezone",
+  "value": "Europe/Moscow"
+}
+
+### GRPC read
+GRPC localhost:8081/store.Store/Read
+
+{
+  "key": "timezone"
+}
+
+
+### HTTP save
+POST localhost:8080/api/store/timezone
+Content-Type: application/json
+
+{
+  "value": "Europe/Moscow - 11"
+}
+
+
+### HTTP read
+GET localhost:8080/api/store/timezone
+Content-Type: application/json

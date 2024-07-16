@@ -1,0 +1,2 @@
+### Health
+GET localhost:8280/healthz

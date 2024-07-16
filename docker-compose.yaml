@@ -1,0 +1,91 @@
+version: '3.7'
+
+services:
+  app:
+    image: golang:1.21
+    ports:
+      - "8180:8180"
+      - "8280:8280/tcp"
+    environment:
+      - "GRPC_HOST=app"
+      - "GRPC_PORT=8280"
+      - "HTTP_HOST=app"
+      - "HTTP_PORT=8180"
+      - "CONSUL_HTTP_ADDR=http://consul-server:8500"
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318"
+    networks:
+      - consul
+    volumes:
+      - ./:/app/
+    working_dir: /app
+    command: go run main.go
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    networks:
+      - consul
+    ports:
+      - "5778:5778"
+      - "16686:16686"
+      - "5318:4318"
+      - "5317:4317"
+
+  consul-server:
+    image: hashicorp/consul:latest
+    container_name: consul-server
+    restart: always
+    volumes:
+      - ./deployments/consul/server.json:/consul/config/server.json:ro
+    networks:
+      - consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    command: "agent"
+
+  consul-client:
+    image: hashicorp/consul:latest
+    container_name: consul-client
+    restart: always
+    volumes:
+      - ./deployments/consul/client.json:/consul/config/client.json:ro
+    networks:
+      - consul
+    command: "agent"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    volumes:
+      - ./deployments/otelcol/config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+    networks:
+      - consul
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - consul
+    volumes:
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - consul
+
+networks:
+  consul:
+    driver: bridge

@@ -1,0 +1,9 @@
+### GRPC call
+GRPC localhost:8081/clock.Clock/Now
+
+{
+  "timezone": "Europe/Moscow"
+}
+
+### HTTP Call
+GET localhost:8080/api/clock/now?timezone=America/New_York
