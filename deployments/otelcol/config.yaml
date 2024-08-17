@@ -7,20 +7,28 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  otlp/jaeger:
-    endpoint: jaeger:4317
+
+  otlp:
+    endpoint: tempo:4317
     tls:
       insecure: true
 
-  prometheus:
-    endpoint: 0.0.0.0:8889
-    namespace: default
+  prometheusremotewrite:
+    endpoint: http://mimir:9009/api/v1/push
+    tls:
+      insecure: true
+
+  otlphttp:
+    endpoint: http://loki:3100/otlp
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp/jaeger]
+      exporters: [otlp]
     metrics:
       receivers: [otlp]
-      exporters: [ prometheus ]
+      exporters: [ prometheusremotewrite ]
+    logs:
+      receivers: [ otlp ]
+      exporters: [ otlphttp ]

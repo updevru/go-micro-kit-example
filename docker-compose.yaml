@@ -20,15 +20,17 @@ services:
     working_dir: /app
     command: go run main.go
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.54
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./deployments/tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200"   # tempo
+      - "4317"  # otlp grpc
+      - "4318"  # otlp http
     networks:
       - consul
-    ports:
-      - "5778:5778"
-      - "16686:16686"
-      - "5318:4318"
-      - "5317:4317"
 
   consul-server:
     image: hashicorp/consul:latest
@@ -69,15 +71,15 @@ services:
     networks:
       - consul
 
-  prometheus:
-    image: prom/prometheus
+  mimir:
+    image: grafana/mimir:latest
     ports:
-      - "9090:9090"
+      - "9009:9009"
+    volumes:
+      - ./deployments/mimir/mimir.yaml:/etc/mimir/mimir.yaml
     networks:
       - consul
-    volumes:
-      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command: "--config.file=/etc/prometheus/prometheus.yml"
+    command: "--config.file=/etc/mimir/mimir.yaml"
 
   grafana:
     image: grafana/grafana:latest
@@ -85,6 +87,16 @@ services:
       - "3000:3000"
     networks:
       - consul
+
+  loki:
+    image: grafana/loki:3.1.0
+    ports:
+      - "3100:3100"
+    networks:
+      - consul
+    volumes:
+      - ./deployments/loki/config.yaml:/mnt/config/loki.yml
+    command: --config.file=/mnt/config/loki.yml
 
 networks:
   consul:

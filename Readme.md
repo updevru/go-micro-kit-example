@@ -1,5 +1,13 @@
 # Демо использования Micro Kit
 
+Приложение представляет из себя key/value storage.
+
+### Функционал
+
+- Запись и получение key/value данных по http и gRPC
+- Регистрация в Consul с health checks
+- Отправка данных OpenTelemetry в коллектор (логи, трейсы, метрики)
+- Фоновая очистка старых данных @TODO
 
 ### Генерация кода
 
@@ -7,13 +15,13 @@
 protoc -I proto .\proto\clock\clock.proto .\proto\store\store.proto --go_out=./gen/ --go_opt=paths=source_relative --go-grpc_out=./gen/ --go-grpc_opt=paths=source_relative --grpc-gateway_out ./gen --grpc-gateway_opt paths=source_relative --grpc-gateway_opt generate_unbound_methods=true --openapiv2_out ./docs --openapiv2_opt allow_merge=true,merge_file_name=api
 ```
 
-### Запуск
+### Запуск 
 
 ```bash
 docker compose up
 ```
 
-Будет запущено два endpoint.
+Будет запущено два endpoint (http и gRPC), Consul, OpenTelemetry collector, Grafana Stack (Grafana, Tempo, Loki, Mimir).
 
 ```
 time=2024-05-14T23:56:20.592+03:00 level=INFO msg="http server listening at" address=:8080
