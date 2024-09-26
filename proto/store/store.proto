@@ -13,40 +13,30 @@ message SaveRequest {
   string value = 2;
 }
 
-message SaveResponse {
-  bool status = 1;
-}
-
-
-message ReadRequest {
-  string key = 1;
-}
-message ReadResponse {
-  string value = 1;
-}
-
-
-message ListRequest {
-
-}
-message ListResponse {
+message StorageResponse {
   string key = 1;
   string value = 2;
 }
 
+message ReadRequest {
+  string key = 1;
+}
+
+message ListRequest {}
+
 service Store {
-  rpc Save(SaveRequest) returns (SaveResponse) {
+  rpc Save(SaveRequest) returns (StorageResponse) {
     option (google.api.http) = {
-      post: "/api/store/{key}"
+      post: "/api/store"
       body: "*"
     };
   }
 
-  rpc Read(ReadRequest) returns (ReadResponse) {
+  rpc Read(ReadRequest) returns (StorageResponse) {
     option (google.api.http) = {
       get: "/api/store/{key}"
     };
   }
 
-  rpc List(ListRequest) returns (stream ListResponse) {}
+  rpc List(ListRequest) returns (stream StorageResponse) {}
 }

@@ -13,6 +13,8 @@ GRPC localhost:8081/store.Store/Read
   "key": "timezone"
 }
 
+### GRPC List
+GRPC localhost:8081/store.Store/List
 
 ### HTTP save
 POST localhost:8080/api/store/timezone

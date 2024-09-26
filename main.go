@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/updevru/go-micro-kit-example/internal/cluster"
 	"github.com/updevru/go-micro-kit-example/internal/config"
 	"github.com/updevru/go-micro-kit-example/internal/cron"
 	"github.com/updevru/go-micro-kit-example/internal/grpc"
-	"github.com/updevru/go-micro-kit-example/internal/handler/clock"
 	"github.com/updevru/go-micro-kit-example/internal/handler/store"
 	"github.com/updevru/go-micro-kit-example/internal/repository"
 	"github.com/updevru/go-micro-kit-example/internal/rest"
@@ -42,12 +42,17 @@ func main() {
 	tracer := telemetry.CreateTracer()
 	meter := telemetry.CreateMeter()
 
+	storageCluster, err := cluster.New(ctx, logger, cfg.Cluster.Servers)
+	if err != nil {
+		logger.ErrorContext(ctx, "Failed to create cluster: %v", err)
+		panic(err)
+	}
+
 	repositoryStore := repository.NewStoreRepository()
-	storeServer := store.NewHandler(logger, tracer, repositoryStore)
-	clockServer := clock.NewHandler(logger, tracer)
+	storeServer := store.NewHandler(logger, tracer, repositoryStore, storageCluster)
 
 	app := server.NewServer(ctx, logger, tracer, meter)
-	app.Grpc(&cfg.Grpc, grpc.NewGRPCServer(clockServer, storeServer))
+	app.Grpc(&cfg.Grpc, grpc.NewGRPCServer(storeServer))
 	app.Http(&cfg.Http, &cfg.Grpc, rest.NewRestServer()...)
 	app.Cron(cron.NewCron(cron.NewCleaner(logger, tracer)))
 

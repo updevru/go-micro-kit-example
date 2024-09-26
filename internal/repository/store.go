@@ -1,51 +1,54 @@
 package repository
 
-import "errors"
+import (
+	"errors"
+	"github.com/updevru/go-micro-kit-example/internal/domain"
+	"golang.org/x/sync/syncmap"
+)
 
 var StoreErrorNotFound = errors.New("key not found")
 
 type StoreInterface interface {
-	Save(key string, value string) error
-	Read(key string) (string, error)
-	List() ([]ItemStore, error)
-}
-
-type ItemStore struct {
-	Key   string
-	Value string
+	Save(item domain.ItemStore) error
+	Read(key string) (*domain.ItemStore, error)
+	List() (chan *domain.ItemStore, error)
 }
 
 type StoreRepository struct {
-	store map[string]string
+	store syncmap.Map
 }
 
 func NewStoreRepository() *StoreRepository {
 	return &StoreRepository{
-		store: make(map[string]string),
+		store: syncmap.Map{},
 	}
 }
 
-func (r *StoreRepository) Save(key string, value string) error {
-	r.store[key] = value
+func (r *StoreRepository) Save(item domain.ItemStore) error {
+	r.store.Store(item.Key, item)
 	return nil
 }
 
-func (r *StoreRepository) Read(key string) (string, error) {
-	if val, exist := r.store[key]; exist {
-		return val, nil
+func (r *StoreRepository) Read(key string) (*domain.ItemStore, error) {
+	if val, exist := r.store.Load(key); exist {
+		result := val.(domain.ItemStore)
+		return &result, nil
 	}
 
-	return "", StoreErrorNotFound
+	return nil, StoreErrorNotFound
 }
 
-func (r *StoreRepository) List() ([]ItemStore, error) {
-	var result []ItemStore
-	for key, value := range r.store {
-		result = append(result, ItemStore{Key: key, Value: value})
-	}
+func (r *StoreRepository) List() (chan *domain.ItemStore, error) {
+	var result = make(chan *domain.ItemStore, 1000)
+
+	go func() {
+		r.store.Range(func(key, value interface{}) bool {
+			item := value.(domain.ItemStore)
+			result <- &item
+			return true
+		})
+		close(result)
+	}()
+
 	return result, nil
-}
-
-func (r *StoreRepository) Watch(con chan ItemStore) {
-
 }

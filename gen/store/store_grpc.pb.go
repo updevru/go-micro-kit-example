@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StoreClient interface {
-	Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*SaveResponse, error)
-	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
+	Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*StorageResponse, error)
+	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*StorageResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Store_ListClient, error)
 }
 
@@ -35,8 +35,8 @@ func NewStoreClient(cc grpc.ClientConnInterface) StoreClient {
 	return &storeClient{cc}
 }
 
-func (c *storeClient) Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*SaveResponse, error) {
-	out := new(SaveResponse)
+func (c *storeClient) Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*StorageResponse, error) {
+	out := new(StorageResponse)
 	err := c.cc.Invoke(ctx, "/store.Store/Save", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -44,8 +44,8 @@ func (c *storeClient) Save(ctx context.Context, in *SaveRequest, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *storeClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error) {
-	out := new(ReadResponse)
+func (c *storeClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*StorageResponse, error) {
+	out := new(StorageResponse)
 	err := c.cc.Invoke(ctx, "/store.Store/Read", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (c *storeClient) List(ctx context.Context, in *ListRequest, opts ...grpc.Ca
 }
 
 type Store_ListClient interface {
-	Recv() (*ListResponse, error)
+	Recv() (*StorageResponse, error)
 	grpc.ClientStream
 }
 
@@ -77,8 +77,8 @@ type storeListClient struct {
 	grpc.ClientStream
 }
 
-func (x *storeListClient) Recv() (*ListResponse, error) {
-	m := new(ListResponse)
+func (x *storeListClient) Recv() (*StorageResponse, error) {
+	m := new(StorageResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -89,8 +89,8 @@ func (x *storeListClient) Recv() (*ListResponse, error) {
 // All implementations must embed UnimplementedStoreServer
 // for forward compatibility
 type StoreServer interface {
-	Save(context.Context, *SaveRequest) (*SaveResponse, error)
-	Read(context.Context, *ReadRequest) (*ReadResponse, error)
+	Save(context.Context, *SaveRequest) (*StorageResponse, error)
+	Read(context.Context, *ReadRequest) (*StorageResponse, error)
 	List(*ListRequest, Store_ListServer) error
 	mustEmbedUnimplementedStoreServer()
 }
@@ -99,10 +99,10 @@ type StoreServer interface {
 type UnimplementedStoreServer struct {
 }
 
-func (UnimplementedStoreServer) Save(context.Context, *SaveRequest) (*SaveResponse, error) {
+func (UnimplementedStoreServer) Save(context.Context, *SaveRequest) (*StorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Save not implemented")
 }
-func (UnimplementedStoreServer) Read(context.Context, *ReadRequest) (*ReadResponse, error) {
+func (UnimplementedStoreServer) Read(context.Context, *ReadRequest) (*StorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
 func (UnimplementedStoreServer) List(*ListRequest, Store_ListServer) error {
@@ -166,7 +166,7 @@ func _Store_List_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Store_ListServer interface {
-	Send(*ListResponse) error
+	Send(*StorageResponse) error
 	grpc.ServerStream
 }
 
@@ -174,7 +174,7 @@ type storeListServer struct {
 	grpc.ServerStream
 }
 
-func (x *storeListServer) Send(m *ListResponse) error {
+func (x *storeListServer) Send(m *StorageResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 

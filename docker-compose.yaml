@@ -1,24 +1,66 @@
 version: '3.7'
 
 services:
-  app:
-    image: golang:1.21
+#  app:
+#    image: golang:1.21
+#    ports:
+#      - "8180:8180"
+#      - "8280:8280/tcp"
+#    environment:
+#      - "GRPC_HOST=app"
+#      - "GRPC_PORT=8280"
+#      - "HTTP_HOST=app"
+#      - "HTTP_PORT=8180"
+#      - "CONSUL_HTTP_ADDR=http://consul-server:8500"
+#      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318"
+#    networks:
+#      - consul
+#    volumes:
+#      - ./:/app/
+#    working_dir: /app
+#    command: go run main.go
+
+  node1:
+    image: kv-go:latest
     ports:
-      - "8180:8180"
-      - "8280:8280/tcp"
+      - "8080:8080"
+      - "8081:8081/tcp"
     environment:
-      - "GRPC_HOST=app"
-      - "GRPC_PORT=8280"
-      - "HTTP_HOST=app"
-      - "HTTP_PORT=8180"
+      - "APP_NAME=node1"
+      - "GRPC_HOST=node1"
+      - "HTTP_HOST=node1"
       - "CONSUL_HTTP_ADDR=http://consul-server:8500"
       - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318"
+      - "OTEL_SERVICE_NAME=node1"
+      - "CLUSTER_SERVERS=node2:8081,node3:8081"
     networks:
       - consul
-    volumes:
-      - ./:/app/
-    working_dir: /app
-    command: go run main.go
+
+  node2:
+    image: kv-go:latest
+    environment:
+      - "APP_NAME=node2"
+      - "GRPC_HOST=node2"
+      - "HTTP_HOST=node2"
+      - "CONSUL_HTTP_ADDR=http://consul-server:8500"
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318"
+      - "OTEL_SERVICE_NAME=node2"
+      - "CLUSTER_SERVERS=node1:8081,node3:8081"
+    networks:
+      - consul
+
+  node3:
+    image: kv-go:latest
+    environment:
+      - "APP_NAME=node3"
+      - "GRPC_HOST=node3"
+      - "HTTP_HOST=node3"
+      - "CONSUL_HTTP_ADDR=http://consul-server:8500"
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318"
+      - "OTEL_SERVICE_NAME=node3"
+      - "CLUSTER_SERVERS=node1:8081,node3:8081"
+    networks:
+      - consul
 
   tempo:
     image: grafana/tempo:latest
