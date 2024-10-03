@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/updevru/go-micro-kit-example/internal/domain"
 	"golang.org/x/sync/syncmap"
+	"time"
 )
 
 var StoreErrorNotFound = errors.New("key not found")
@@ -11,7 +12,9 @@ var StoreErrorNotFound = errors.New("key not found")
 type StoreInterface interface {
 	Save(item domain.ItemStore) error
 	Read(key string) (*domain.ItemStore, error)
+	Delete(key string) error
 	List() (chan *domain.ItemStore, error)
+	DeleteDead(date time.Time) (int, error)
 }
 
 type StoreRepository struct {
@@ -36,6 +39,24 @@ func (r *StoreRepository) Read(key string) (*domain.ItemStore, error) {
 	}
 
 	return nil, StoreErrorNotFound
+}
+
+func (r *StoreRepository) Delete(key string) error {
+	r.store.Delete(key)
+	return nil
+}
+
+func (r *StoreRepository) DeleteDead(date time.Time) (int, error) {
+	var deleted int
+	r.store.Range(func(key, value interface{}) bool {
+		item := value.(domain.ItemStore)
+		if item.IsDead(date) {
+			r.store.Delete(key)
+			deleted++
+		}
+		return true
+	})
+	return deleted, nil
 }
 
 func (r *StoreRepository) List() (chan *domain.ItemStore, error) {

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package store;
+
+// Настройки для генерации Go кода.
+option go_package = "proto-demo.store.v1";
+
+message LogRequest {
+  enum Action {
+    SAVE = 0;
+    DELETE = 1;
+  }
+
+  Action action = 1;
+  string key = 2;
+  string value = 3;
+  int64 deadline = 4;
+}
+
+message LogResponse {}
+
+
+service Log {
+  rpc Save(LogRequest) returns (LogResponse) {}
+}

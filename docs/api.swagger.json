@@ -1,10 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "store/store.proto",
+    "title": "store/log.proto",
     "version": "version not set"
   },
   "tags": [
+    {
+      "name": "Log"
+    },
     {
       "name": "Store"
     }
@@ -76,10 +79,46 @@
         "tags": [
           "Store"
         ]
+      },
+      "delete": {
+        "operationId": "Store_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/storeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Store"
+        ]
       }
     }
   },
   "definitions": {
+    "LogRequestAction": {
+      "type": "string",
+      "enum": [
+        "SAVE",
+        "DELETE"
+      ],
+      "default": "SAVE"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -108,6 +147,12 @@
         }
       }
     },
+    "storeDeleteResponse": {
+      "type": "object"
+    },
+    "storeLogResponse": {
+      "type": "object"
+    },
     "storeSaveRequest": {
       "type": "object",
       "properties": {
@@ -116,6 +161,10 @@
         },
         "value": {
           "type": "string"
+        },
+        "ttl": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

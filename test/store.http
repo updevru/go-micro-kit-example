@@ -13,6 +13,22 @@ GRPC localhost:8081/store.Store/Read
   "key": "timezone"
 }
 
+### GRPC save ttl
+GRPC localhost:8081/store.Store/Save
+
+{
+  "key": "with_ttl",
+  "value": "10",
+  "ttl": 10
+}
+
+### GRPC read ttl
+GRPC localhost:8081/store.Store/Read
+
+{
+  "key": "with_ttl"
+}
+
 ### GRPC List
 GRPC localhost:8081/store.Store/List
 

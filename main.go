@@ -8,6 +8,7 @@ import (
 	"github.com/updevru/go-micro-kit-example/internal/config"
 	"github.com/updevru/go-micro-kit-example/internal/cron"
 	"github.com/updevru/go-micro-kit-example/internal/grpc"
+	"github.com/updevru/go-micro-kit-example/internal/handler/log"
 	"github.com/updevru/go-micro-kit-example/internal/handler/store"
 	"github.com/updevru/go-micro-kit-example/internal/repository"
 	"github.com/updevru/go-micro-kit-example/internal/rest"
@@ -42,19 +43,20 @@ func main() {
 	tracer := telemetry.CreateTracer()
 	meter := telemetry.CreateMeter()
 
-	storageCluster, err := cluster.New(ctx, logger, cfg.Cluster.Servers)
+	storageCluster, err := cluster.New(ctx, logger, tracer, cfg.Cluster.Servers)
 	if err != nil {
 		logger.ErrorContext(ctx, "Failed to create cluster: %v", err)
 		panic(err)
 	}
 
 	repositoryStore := repository.NewStoreRepository()
-	storeServer := store.NewHandler(logger, tracer, repositoryStore, storageCluster)
+	storeHandler := store.NewHandler(logger, tracer, repositoryStore, storageCluster)
+	logHandler := log.NewHandler(logger, tracer, repositoryStore)
 
 	app := server.NewServer(ctx, logger, tracer, meter)
-	app.Grpc(&cfg.Grpc, grpc.NewGRPCServer(storeServer))
+	app.Grpc(&cfg.Grpc, grpc.NewGRPCServer(storeHandler, logHandler))
 	app.Http(&cfg.Http, &cfg.Grpc, rest.NewRestServer()...)
-	app.Cron(cron.NewCron(cron.NewCleaner(logger, tracer)))
+	app.Cron(cron.NewCron(cron.NewCleaner(logger, tracer, repositoryStore)))
 
 	consul, err := discovery.NewConsul(&cfg.App, &cfg.Http, &cfg.Grpc)
 	app.AddDiscovery(consul)

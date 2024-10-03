@@ -11,6 +11,7 @@ option go_package = "proto-demo.store.v1";
 message SaveRequest {
   string key = 1;
   string value = 2;
+  int32 ttl = 3;
 }
 
 message StorageResponse {
@@ -22,7 +23,13 @@ message ReadRequest {
   string key = 1;
 }
 
+message DeleteResponse {}
+message DeleteRequest {
+  string key = 1;
+}
+
 message ListRequest {}
+
 
 service Store {
   rpc Save(SaveRequest) returns (StorageResponse) {
@@ -35,6 +42,12 @@ service Store {
   rpc Read(ReadRequest) returns (StorageResponse) {
     option (google.api.http) = {
       get: "/api/store/{key}"
+    };
+  }
+
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {
+    option (google.api.http) = {
+      delete: "/api/store/{key}"
     };
   }
 

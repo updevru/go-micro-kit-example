@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type StoreClient interface {
 	Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*StorageResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*StorageResponse, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Store_ListClient, error)
 }
 
@@ -47,6 +48,15 @@ func (c *storeClient) Save(ctx context.Context, in *SaveRequest, opts ...grpc.Ca
 func (c *storeClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*StorageResponse, error) {
 	out := new(StorageResponse)
 	err := c.cc.Invoke(ctx, "/store.Store/Read", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storeClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/store.Store/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +101,7 @@ func (x *storeListClient) Recv() (*StorageResponse, error) {
 type StoreServer interface {
 	Save(context.Context, *SaveRequest) (*StorageResponse, error)
 	Read(context.Context, *ReadRequest) (*StorageResponse, error)
+	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	List(*ListRequest, Store_ListServer) error
 	mustEmbedUnimplementedStoreServer()
 }
@@ -104,6 +115,9 @@ func (UnimplementedStoreServer) Save(context.Context, *SaveRequest) (*StorageRes
 }
 func (UnimplementedStoreServer) Read(context.Context, *ReadRequest) (*StorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedStoreServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedStoreServer) List(*ListRequest, Store_ListServer) error {
 	return status.Errorf(codes.Unimplemented, "method List not implemented")
@@ -157,6 +171,24 @@ func _Store_Read_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Store_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StoreServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/store.Store/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoreServer).Delete(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Store_List_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ListRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -192,6 +224,10 @@ var Store_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _Store_Read_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _Store_Delete_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
