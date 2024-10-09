@@ -25,7 +25,6 @@ type StoreClient interface {
 	Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*StorageResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*StorageResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
-	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Store_ListClient, error)
 }
 
 type storeClient struct {
@@ -63,38 +62,6 @@ func (c *storeClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grp
 	return out, nil
 }
 
-func (c *storeClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Store_ListClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Store_ServiceDesc.Streams[0], "/store.Store/List", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &storeListClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Store_ListClient interface {
-	Recv() (*StorageResponse, error)
-	grpc.ClientStream
-}
-
-type storeListClient struct {
-	grpc.ClientStream
-}
-
-func (x *storeListClient) Recv() (*StorageResponse, error) {
-	m := new(StorageResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // StoreServer is the server API for Store service.
 // All implementations must embed UnimplementedStoreServer
 // for forward compatibility
@@ -102,7 +69,6 @@ type StoreServer interface {
 	Save(context.Context, *SaveRequest) (*StorageResponse, error)
 	Read(context.Context, *ReadRequest) (*StorageResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
-	List(*ListRequest, Store_ListServer) error
 	mustEmbedUnimplementedStoreServer()
 }
 
@@ -118,9 +84,6 @@ func (UnimplementedStoreServer) Read(context.Context, *ReadRequest) (*StorageRes
 }
 func (UnimplementedStoreServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
-}
-func (UnimplementedStoreServer) List(*ListRequest, Store_ListServer) error {
-	return status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedStoreServer) mustEmbedUnimplementedStoreServer() {}
 
@@ -189,27 +152,6 @@ func _Store_Delete_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Store_List_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ListRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(StoreServer).List(m, &storeListServer{stream})
-}
-
-type Store_ListServer interface {
-	Send(*StorageResponse) error
-	grpc.ServerStream
-}
-
-type storeListServer struct {
-	grpc.ServerStream
-}
-
-func (x *storeListServer) Send(m *StorageResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
 // Store_ServiceDesc is the grpc.ServiceDesc for Store service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -230,12 +172,6 @@ var Store_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Store_Delete_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "List",
-			Handler:       _Store_List_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "store/store.proto",
 }

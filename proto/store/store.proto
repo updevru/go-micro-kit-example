@@ -50,6 +50,4 @@ service Store {
       delete: "/api/store/{key}"
     };
   }
-
-  rpc List(ListRequest) returns (stream StorageResponse) {}
 }

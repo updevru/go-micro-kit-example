@@ -13,7 +13,6 @@ type StoreInterface interface {
 	Save(item domain.ItemStore) error
 	Read(key string) (*domain.ItemStore, error)
 	Delete(key string) error
-	List() (chan *domain.ItemStore, error)
 	DeleteDead(date time.Time) (int, error)
 }
 
@@ -57,19 +56,4 @@ func (r *StoreRepository) DeleteDead(date time.Time) (int, error) {
 		return true
 	})
 	return deleted, nil
-}
-
-func (r *StoreRepository) List() (chan *domain.ItemStore, error) {
-	var result = make(chan *domain.ItemStore, 1000)
-
-	go func() {
-		r.store.Range(func(key, value interface{}) bool {
-			item := value.(domain.ItemStore)
-			result <- &item
-			return true
-		})
-		close(result)
-	}()
-
-	return result, nil
 }
