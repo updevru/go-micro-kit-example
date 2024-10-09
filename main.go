@@ -49,7 +49,12 @@ func main() {
 		panic(err)
 	}
 
-	repositoryStore := repository.NewStoreRepository()
+	repositoryStore, err := repository.Factory(cfg.Storage)
+	if err != nil {
+		logger.ErrorContext(ctx, "Failed to create storage: %v", err)
+		panic(err)
+	}
+
 	storeHandler := store.NewHandler(logger, tracer, repositoryStore, storageCluster)
 	logHandler := log.NewHandler(logger, tracer, repositoryStore)
 

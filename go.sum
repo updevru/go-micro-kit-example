@@ -190,10 +190,10 @@ github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1F
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
-github.com/updevru/go-micro-kit v0.0.0-20240731164645-de4c6e3eda2d h1:RiY3hXEh6q3tImOYXmPw5J6Kuq7rUU3UwlEjW/6BW1I=
-github.com/updevru/go-micro-kit v0.0.0-20240731164645-de4c6e3eda2d/go.mod h1:eGljjb3H6ggPAXDOeGGbwjV00JiwpjI4KJxzqqjlZ9U=
 github.com/updevru/go-micro-kit v0.8.1 h1:ZJsB2EKW3h05mTCKL20cRFb7CkPQFOenjVNMUKnkj/s=
 github.com/updevru/go-micro-kit v0.8.1/go.mod h1:eGljjb3H6ggPAXDOeGGbwjV00JiwpjI4KJxzqqjlZ9U=
+go.etcd.io/bbolt v1.3.11 h1:yGEzV1wPz2yVCLsD8ZAiGHhHVlczyC9d1rP43/VCRJ0=
+go.etcd.io/bbolt v1.3.11/go.mod h1:dksAq7YMXoljX0xu6VF5DMZGbhYYoLUalEiSySYAS4I=
 go.opentelemetry.io/contrib/bridges/otelslog v0.3.0 h1:Kf8NK4WW/pn3f9Gwx6XJAB2zlaW2M3VLQ4sQ3TKJhA8=
 go.opentelemetry.io/contrib/bridges/otelslog v0.3.0/go.mod h1:JV00+So1cv6GIYNUeO0xFfl/qE+DUtS3hpBlLIyOFUE=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0 h1:9G6E0TXzGFVfTnawRzrPl83iHOAV7L8NJiR8RSGYV1g=
