@@ -43,7 +43,7 @@ func main() {
 	tracer := telemetry.CreateTracer()
 	meter := telemetry.CreateMeter()
 
-	storageCluster, err := cluster.New(ctx, logger, tracer, cfg.Cluster.Servers)
+	replicator, err := cluster.NewGrpcReplicator(ctx, logger, tracer, cfg.Cluster.Servers)
 	if err != nil {
 		logger.ErrorContext(ctx, "Failed to create cluster: %v", err)
 		panic(err)
@@ -55,7 +55,7 @@ func main() {
 		panic(err)
 	}
 
-	storeHandler := store.NewHandler(logger, tracer, repositoryStore, storageCluster)
+	storeHandler := store.NewHandler(logger, tracer, repositoryStore, replicator)
 	logHandler := log.NewHandler(logger, tracer, repositoryStore)
 
 	app := server.NewServer(ctx, logger, tracer, meter)

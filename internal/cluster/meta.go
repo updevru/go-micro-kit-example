@@ -9,10 +9,11 @@ const metaHeader = "i-client"
 const metaValue = "internal"
 
 func ctxWithMetadata(ctx context.Context) context.Context {
-	return metadata.NewOutgoingContext(ctx, metadata.Pairs(metaHeader, metaValue))
+	c := metadata.NewOutgoingContext(ctx, metadata.Pairs(metaHeader, metaValue))
+	return c
 }
 
-func isInternalRequest(ctx context.Context) bool {
+func (c *Replicator) isInternalRequest(ctx context.Context) bool {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return false

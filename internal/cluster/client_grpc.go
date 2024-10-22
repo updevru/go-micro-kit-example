@@ -12,14 +12,14 @@ import (
 	"log/slog"
 )
 
-type ServiceClient struct {
+type GrpcClient struct {
 	conn   pb.LogClient
 	queue  chan *pb.LogRequest
 	logger *slog.Logger
 	tracer trace.Tracer
 }
 
-func NewServiceClient(logger *slog.Logger, tracer trace.Tracer, address string) (*ServiceClient, error) {
+func NewGrpcClient(ctx context.Context, logger *slog.Logger, tracer trace.Tracer, address string) (*GrpcClient, error) {
 	conn, err := grpc.NewClient(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -30,15 +30,17 @@ func NewServiceClient(logger *slog.Logger, tracer trace.Tracer, address string) 
 	}
 
 	client := pb.NewLogClient(conn)
-	return &ServiceClient{
+	service := &GrpcClient{
 		conn:   client,
 		queue:  make(chan *pb.LogRequest, 1000),
 		logger: logger.With(slog.String("server", address)),
 		tracer: tracer,
-	}, nil
+	}
+	service.worker(ctx)
+	return service, nil
 }
 
-func (s *ServiceClient) SaveLog(item *domain.ItemStore) {
+func (s *GrpcClient) SaveLog(item *domain.ItemStore) {
 	s.queue <- &pb.LogRequest{
 		Action:   pb.LogRequest_SAVE,
 		Key:      item.Key,
@@ -47,14 +49,14 @@ func (s *ServiceClient) SaveLog(item *domain.ItemStore) {
 	}
 }
 
-func (s *ServiceClient) DeleteLog(item *domain.ItemStore) {
+func (s *GrpcClient) DeleteLog(item *domain.ItemStore) {
 	s.queue <- &pb.LogRequest{
 		Action: pb.LogRequest_DELETE,
 		Key:    item.Key,
 	}
 }
 
-func (s *ServiceClient) Worker(ctx context.Context) {
+func (s *GrpcClient) worker(ctx context.Context) {
 	go func() {
 		for {
 			select {

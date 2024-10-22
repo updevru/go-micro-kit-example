@@ -25,7 +25,7 @@ func (s *Handler) Save(ctx context.Context, in *pb.SaveRequest) (*pb.StorageResp
 	}
 
 	s.log.InfoContext(ctxSpan, "success save item", slog.String("key", in.Key))
-	s.cluster.SaveItem(ctxSpan, &item)
+	s.replication.SaveItem(ctxSpan, &item)
 
 	return mapResponse(&item), err
 }

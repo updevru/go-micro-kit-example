@@ -19,7 +19,7 @@ func (s *Handler) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteR
 	}
 
 	s.log.InfoContext(ctxSpan, "success delete item", slog.String("key", in.Key))
-	s.cluster.DeleteItem(ctxSpan, item)
+	s.replication.DeleteItem(ctxSpan, item)
 
 	return &pb.DeleteResponse{}, err
 }

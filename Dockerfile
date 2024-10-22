@@ -4,6 +4,7 @@ RUN mkdir -p /app
 ADD . /app
 WORKDIR /app
 RUN go mod download
+RUN go test -v ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -o main
 
 ## Контейнер в котором будет находиться программа

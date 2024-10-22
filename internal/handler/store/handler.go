@@ -11,14 +11,14 @@ import (
 
 type Handler struct {
 	pb.UnimplementedStoreServer
-	log     *slog.Logger
-	tracer  trace.Tracer
-	store   repository.StoreInterface
-	cluster *cluster.Cluster
+	log         *slog.Logger
+	tracer      trace.Tracer
+	store       repository.StoreInterface
+	replication *cluster.Replicator
 }
 
-func NewHandler(log *slog.Logger, tracer trace.Tracer, store repository.StoreInterface, cluster *cluster.Cluster) *Handler {
-	return &Handler{log: log, tracer: tracer, store: store, cluster: cluster}
+func NewHandler(log *slog.Logger, tracer trace.Tracer, store repository.StoreInterface, replication *cluster.Replicator) *Handler {
+	return &Handler{log: log, tracer: tracer, store: store, replication: replication}
 }
 
 func mapResponse(item *domain.ItemStore) *pb.StorageResponse {

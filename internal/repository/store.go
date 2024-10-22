@@ -8,6 +8,7 @@ import (
 
 var StoreErrorNotFound = errors.New("key not found")
 
+//go:generate mockery --name=StoreInterface --filename=mock_store.go
 type StoreInterface interface {
 	Save(item domain.ItemStore) error
 	Read(key string) (*domain.ItemStore, error)
